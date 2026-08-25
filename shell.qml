@@ -13,6 +13,7 @@ ShellRoot {
     readonly property alias notifications: notificationService
     readonly property alias metrics: metricsService
     readonly property alias systemInfo: systemInfoService
+    readonly property alias sessionControls: sessionControlsService
     readonly property alias trayItems: trayService.items
 
     Theme {
@@ -39,6 +40,10 @@ ShellRoot {
         id: audioService
     }
 
+    SessionControlsService {
+        id: sessionControlsService
+    }
+
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
@@ -57,6 +62,7 @@ ShellRoot {
                 notifications: root.notifications
                 metrics: root.metrics
                 systemInfo: root.systemInfo
+                sessionControls: root.sessionControls
                 trayItems: root.trayItems
             }
         }

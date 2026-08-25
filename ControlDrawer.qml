@@ -14,6 +14,7 @@ PopupWindow {
     required property var notifications
     required property var metrics
     required property var systemInfo
+    required property var sessionControls
     required property var trayItems
 
     signal dismissed()
@@ -85,13 +86,13 @@ PopupWindow {
                 id: drawerHeader
 
                 width: parent.width
-                height: root.theme.barHeight + 40
+                height: root.theme.barHeight + 66
                 implicitWidth: Math.max(
                     drawerStatusLine.implicitWidth,
                     Math.max(
                         userSummaryLabel.implicitWidth,
                         platformSummaryLabel.implicitWidth
-                    ) + headerActions.implicitWidth + 8
+                    ) + Math.max(headerActions.implicitWidth, sessionActions.implicitWidth) + 8
                 )
 
                 StatusLine {
@@ -109,48 +110,38 @@ PopupWindow {
                     onDrawerClicked: root.visible = false
                 }
 
-                Item {
+                Text {
+                    id: userSummaryLabel
+
                     anchors {
-                        top: parent.top
-                        topMargin: root.theme.barHeight + 6
                         left: parent.left
                         leftMargin: root.theme.drawerPadding
                         right: headerActions.left
                         rightMargin: 8
+                        verticalCenter: headerActions.verticalCenter
                     }
-                    height: 34
+                    text: root.systemInfo.userSummary
+                    elide: Text.ElideRight
+                    color: root.theme.drawerTitle
+                    font.family: root.theme.fontFamily
+                    font.pixelSize: root.theme.fontSize + 1
+                    font.weight: Font.DemiBold
+                }
 
-                    Column {
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                        }
-                        spacing: 1
+                Text {
+                    id: platformSummaryLabel
 
-                        Text {
-                            id: userSummaryLabel
-
-                            width: parent.width
-                            text: root.systemInfo.userSummary
-                            elide: Text.ElideRight
-                            color: root.theme.drawerTitle
-                            font.family: root.theme.fontFamily
-                            font.pixelSize: root.theme.fontSize + 1
-                            font.weight: Font.DemiBold
-                        }
-
-                        Text {
-                            id: platformSummaryLabel
-
-                            width: parent.width
-                            text: root.systemInfo.platformSummary
-                            elide: Text.ElideRight
-                            color: root.theme.textSecondary
-                            font.family: root.theme.fontFamily
-                            font.pixelSize: root.theme.fontSize - 1
-                        }
+                    anchors {
+                        top: userSummaryLabel.bottom
+                        topMargin: 1
+                        left: userSummaryLabel.left
+                        right: userSummaryLabel.right
                     }
+                    text: root.systemInfo.platformSummary
+                    elide: Text.ElideRight
+                    color: root.theme.textSecondary
+                    font.family: root.theme.fontFamily
+                    font.pixelSize: root.theme.fontSize - 1
                 }
 
                 Row {
@@ -174,6 +165,7 @@ PopupWindow {
                         theme: root.theme
                         itemFilter: item => root.isBluetoothItem(item)
                         glyphForItem: item => ""
+                        glyphHorizontalOffset: -0.5
                     }
 
                     Tray {
@@ -223,6 +215,42 @@ PopupWindow {
                                 root.visible = false
                             }
                         }
+                    }
+                }
+
+                Row {
+                    id: sessionActions
+
+                    anchors {
+                        top: headerActions.bottom
+                        topMargin: 2
+                        right: parent.right
+                        rightMargin: root.theme.drawerPadding
+                    }
+                    height: root.theme.controlHeight
+                    spacing: 2
+
+                    DrawerActionButton {
+                        theme: root.theme
+                        glyph: "󰖔"
+                        active: root.sessionControls.hyprsunsetEnabled
+                        activeGlyphColor: root.theme.warningText
+                        onClicked: root.sessionControls.toggleHyprsunset()
+                    }
+
+                    DrawerActionButton {
+                        theme: root.theme
+                        glyph: root.sessionControls.idleInhibited ? "󰒳" : "󰒲"
+                        active: root.sessionControls.idleInhibited
+                        onClicked: root.sessionControls.toggleIdleInhibit(root.panelWindow)
+                    }
+
+                    DrawerActionButton {
+                        theme: root.theme
+                        glyph: root.notifications.dnd ? "󰂛" : "󰂚"
+                        active: root.notifications.dnd
+                        activeGlyphColor: root.theme.notificationAccent
+                        onClicked: root.notifications.toggleDnd()
                     }
                 }
             }

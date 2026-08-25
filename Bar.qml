@@ -13,6 +13,7 @@ PanelWindow {
     required property var notifications
     required property var metrics
     required property var systemInfo
+    required property var sessionControls
     required property var trayItems
 
     property bool drawerOpen: false
@@ -82,6 +83,7 @@ PanelWindow {
                 notifications: root.notifications
                 metrics: root.metrics
                 systemInfo: root.systemInfo
+                sessionControls: root.sessionControls
                 trayItems: root.trayItems
                 onDismissed: root.drawerOpen = false
             }
