@@ -100,6 +100,8 @@ Color values belong in the files under `themes/`. New schemes should expose the 
 bar/
 ├── shell.qml
 ├── Bar.qml
+├── StatusLine.qml
+├── CenteredGlyph.qml
 ├── Workspaces.qml
 ├── Audio.qml
 ├── AudioService.qml

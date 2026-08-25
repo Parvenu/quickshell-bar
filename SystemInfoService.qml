@@ -17,9 +17,14 @@ QtObject {
         ? `${userName}@${hostName}`
         : userName
     readonly property string uptimeText: formatUptime(uptimeSeconds)
-    readonly property string sessionSummary: hyprlandVersion.length > 0
-        ? `Hyprland ${hyprlandVersion} · up ${uptimeText}`
-        : `Hyprland · up ${uptimeText}`
+    readonly property string shortKernelVersion: kernelVersion.split("-")[0]
+    readonly property string userSummary: `${userName} · up ${uptimeText}`
+    readonly property string compositorSummary: hyprlandVersion.length > 0
+        ? `Hyprland ${hyprlandVersion}`
+        : "Hyprland"
+    readonly property string platformSummary: shortKernelVersion.length > 0
+        ? `${compositorSummary} · Linux ${shortKernelVersion}`
+        : compositorSummary
 
     function formatUptime(seconds): string {
         const days = Math.floor(seconds / 86400)

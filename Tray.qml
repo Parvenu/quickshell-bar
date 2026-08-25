@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 
 Item {
     id: root
@@ -10,6 +12,53 @@ Item {
     required property var panelWindow
     required property var trayItems
     required property var theme
+
+    property var itemFilter: item => true
+    property var glyphForItem: item => ""
+    property int buttonWidth: 26
+
+    function iconName(source): string {
+        const value = source.toString()
+        const pathStart = value.lastIndexOf("/") + 1
+        const queryStart = value.indexOf("?", pathStart)
+        return value.slice(pathStart, queryStart >= 0 ? queryStart : value.length)
+    }
+
+    function preferredIconName(item): string {
+        const id = String(item?.id ?? "").toLowerCase()
+        if (id.startsWith("discord"))
+            return "discord"
+        if (id === "steam")
+            return "steam"
+        return ""
+    }
+
+    function resolvedIconSource(item): string {
+        const id = String(item?.id ?? "").toLowerCase()
+        if (id === "wayscriber")
+            return "file:///usr/share/icons/hicolor/symbolic/apps/wayscriber-symbolic.svg"
+
+        const preferredName = preferredIconName(item)
+        if (preferredName.length > 0) {
+            const preferredIcon = Quickshell.iconPath(preferredName, true)
+            if (preferredIcon.length > 0)
+                return preferredIcon
+        }
+
+        const value = item.icon.toString()
+        const name = iconName(value)
+        if (!name.endsWith("-symbolic"))
+            return value
+
+        const regularName = name.slice(0, -"-symbolic".length)
+        const regularIcon = Quickshell.iconPath(regularName, true)
+        return regularIcon.length > 0 ? regularIcon : value
+    }
+
+    function isSymbolicIcon(item, source): bool {
+        const id = String(item?.id ?? "").toLowerCase()
+        return id === "wayscriber" || iconName(source).endsWith("-symbolic")
+    }
 
     implicitWidth: trayRow.implicitWidth
     implicitHeight: trayRow.implicitHeight
@@ -27,8 +76,12 @@ Item {
                 required property var modelData
                 readonly property var trayItem: modelData
                 readonly property bool needsAttention: trayItem.status === Status.NeedsAttention
+                readonly property string glyph: root.glyphForItem(trayItem)
+                readonly property string iconSource: root.resolvedIconSource(trayItem)
+                readonly property bool symbolicIcon: root.isSymbolicIcon(trayItem, iconSource)
 
-                width: 26
+                visible: root.itemFilter(trayItem)
+                width: root.buttonWidth
                 height: root.theme.controlHeight
                 radius: root.theme.smallRadius
                 color: trayMouse.containsMouse ? root.theme.controlHover : "transparent"
@@ -39,16 +92,34 @@ Item {
                     ColorAnimation { duration: root.theme.animationFast }
                 }
 
-                Image {
+                IconImage {
                     anchors {
                         fill: parent
                         margins: 3
                     }
-                    source: trayButton.trayItem.icon
-                    fillMode: Image.PreserveAspectFit
+                    source: trayButton.iconSource
                     asynchronous: true
-                    cache: true
-                    visible: source.toString().length > 0
+                    visible: trayButton.glyph.length === 0 && source.toString().length > 0
+                    layer.enabled: trayButton.symbolicIcon
+                    layer.effect: MultiEffect {
+                        brightness: 1
+                        colorization: 1
+                        colorizationColor: trayButton.needsAttention
+                            ? root.theme.trayAttention
+                            : root.theme.textPrimary
+                    }
+                }
+
+                CenteredGlyph {
+                    anchors.fill: parent
+                    glyph: trayButton.glyph
+                    color: trayButton.needsAttention
+                        ? root.theme.trayAttention
+                        : root.theme.textPrimary
+                    fontFamily: root.theme.fontFamily
+                    fontPixelSize: root.theme.iconSize
+                    fontWeight: Font.DemiBold
+                    visible: trayButton.glyph.length > 0
                 }
 
                 Text {
@@ -56,11 +127,13 @@ Item {
                     text: trayButton.trayItem.title.length > 0
                         ? trayButton.trayItem.title.slice(0, 1).toUpperCase()
                         : "?"
-                    color: root.theme.textSecondary
+                    color: trayButton.needsAttention
+                        ? root.theme.trayAttention
+                        : root.theme.textSecondary
                     font.family: root.theme.fontFamily
                     font.pixelSize: root.theme.fontSize
                     font.weight: Font.DemiBold
-                    visible: trayButton.trayItem.icon.length === 0
+                    visible: trayButton.glyph.length === 0 && trayButton.trayItem.icon.length === 0
                 }
 
                 MouseArea {

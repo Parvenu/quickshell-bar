@@ -4,11 +4,11 @@ import QtQuick
 
 QtObject {
     readonly property string name: "Glass"
-    readonly property int barContentVerticalOffset: 1
+    readonly property int barContentVerticalOffset: 0
 
     readonly property color barBackground: "#00000000"
     readonly property color barBorder: "#00000000"
-    readonly property color drawerBackground: "#b0121212"
+    readonly property color drawerBackground: "#191724"
     readonly property color controlBackground: "#18ffffff"
     readonly property color controlHover: "#2bffffff"
     readonly property color divider: "#55cecece"
@@ -18,7 +18,7 @@ QtObject {
     readonly property color textMuted: "#787878"
     readonly property color clockText: "#cecece"
     readonly property color drawerTitle: "#d8dee9"
-    readonly property color drawerLauncherActive: "#d8dee9"
+    readonly property color drawerLauncherActive: "#c4a7e7"
 
     readonly property color focusedWorkspace: "#d8dee9"
     readonly property color activeWorkspace: "#cecece"

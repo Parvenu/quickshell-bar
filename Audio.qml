@@ -33,13 +33,13 @@ Row {
             ColorAnimation { duration: root.theme.animationFast }
         }
 
-        Text {
-            anchors.centerIn: parent
-            text: speakerButton.icon
+        CenteredGlyph {
+            anchors.fill: parent
+            glyph: speakerButton.icon
             color: root.audio.sinkMuted ? root.theme.textMuted : root.theme.audioOutputAccent
-            font.family: root.theme.fontFamily
-            font.pixelSize: root.theme.iconSize
-            font.weight: Font.DemiBold
+            fontFamily: root.theme.fontFamily
+            fontPixelSize: root.theme.iconSize
+            fontWeight: Font.DemiBold
         }
 
         MouseArea {
@@ -72,13 +72,13 @@ Row {
             ColorAnimation { duration: root.theme.animationFast }
         }
 
-        Text {
-            anchors.centerIn: parent
-            text: root.audio.sourceAvailable && !root.audio.sourceMuted ? "" : ""
+        CenteredGlyph {
+            anchors.fill: parent
+            glyph: root.audio.sourceAvailable && !root.audio.sourceMuted ? "" : ""
             color: root.audio.sourceMuted ? root.theme.textMuted : root.theme.audioInputAccent
-            font.family: root.theme.fontFamily
-            font.pixelSize: root.theme.iconSize
-            font.weight: Font.DemiBold
+            fontFamily: root.theme.fontFamily
+            fontPixelSize: root.theme.iconSize
+            fontWeight: Font.DemiBold
         }
 
         MouseArea {

@@ -9,26 +9,54 @@ PopupWindow {
     required property var panelWindow
     required property var anchorItem
     required property var theme
+    required property var clock
     required property var audio
     required property var notifications
+    required property var metrics
     required property var systemInfo
     required property var trayItems
 
     signal dismissed()
 
-    implicitWidth: 260
-    implicitHeight: 186
+    function trayItemId(item): string {
+        return String(item?.id ?? "").toLowerCase()
+    }
+
+    function isBluetoothItem(item): bool {
+        return trayItemId(item) === "blueman"
+    }
+
+    function isNetworkItem(item): bool {
+        const id = trayItemId(item)
+        return id === "nm-applet" || id === "nm_applet"
+    }
+
+    function isSystemItem(item): bool {
+        return isBluetoothItem(item) || isNetworkItem(item)
+    }
+
+    implicitWidth: Math.ceil(Math.max(
+        root.anchorItem.width,
+        drawerHeader.implicitWidth,
+        applicationSurface.implicitWidth,
+        notificationButton.implicitWidth
+    )) + root.theme.drawerPadding * 2
+    implicitHeight: contentColumn.implicitHeight + 10
     color: "transparent"
     grabFocus: true
 
     anchor {
         window: root.panelWindow
         item: root.anchorItem
-        edges: Edges.Bottom | Edges.Right
+        rect.x: root.theme.drawerPadding
+        rect.y: 0
+        rect.width: root.anchorItem.width
+        rect.height: root.anchorItem.height
+        edges: Edges.Top | Edges.Right
         gravity: Edges.Bottom | Edges.Left
-        margins.top: 6
-        adjustment: PopupAdjustment.Slide
+        adjustment: PopupAdjustment.None
     }
+
 
     Component.onCompleted: visible = true
     onVisibleChanged: {
@@ -44,104 +72,204 @@ PopupWindow {
         border.color: root.theme.divider
 
         Column {
+            id: contentColumn
+
             anchors {
-                fill: parent
-                margins: 12
+                top: parent.top
+                left: parent.left
+                right: parent.right
             }
-            spacing: 8
-
-            Column {
-                width: parent.width
-                spacing: 1
-
-                Text {
-                    text: `  ${root.systemInfo.identity}`
-                    color: root.theme.drawerTitle
-                    font.family: root.theme.fontFamily
-                    font.pixelSize: root.theme.fontSize + 1
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    text: root.systemInfo.sessionSummary
-                    color: root.theme.textSecondary
-                    font.family: root.theme.fontFamily
-                    font.pixelSize: root.theme.fontSize - 1
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: root.theme.divider
-            }
+            spacing: 6
 
             Item {
+                id: drawerHeader
+
                 width: parent.width
-                height: root.theme.controlHeight
+                height: root.theme.barHeight + 40
+                implicitWidth: Math.max(
+                    drawerStatusLine.implicitWidth,
+                    Math.max(
+                        userSummaryLabel.implicitWidth,
+                        platformSummaryLabel.implicitWidth
+                    ) + headerActions.implicitWidth + 8
+                )
 
-                Audio {
-                    anchors {
-                        left: parent.left
-                        verticalCenter: parent.verticalCenter
-                    }
-                    audio: root.audio
-                    theme: root.theme
-                }
-
-                Rectangle {
-                    id: powerButton
+                StatusLine {
+                    id: drawerStatusLine
 
                     anchors {
                         right: parent.right
-                        verticalCenter: parent.verticalCenter
+                        rightMargin: root.theme.drawerPadding
                     }
-                    width: 26
+                    theme: root.theme
+                    clock: root.clock
+                    audio: root.audio
+                    metrics: root.metrics
+                    drawerOpen: true
+                    onDrawerClicked: root.visible = false
+                }
+
+                Item {
+                    anchors {
+                        top: parent.top
+                        topMargin: root.theme.barHeight + 6
+                        left: parent.left
+                        leftMargin: root.theme.drawerPadding
+                        right: headerActions.left
+                        rightMargin: 8
+                    }
+                    height: 34
+
+                    Column {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                        }
+                        spacing: 1
+
+                        Text {
+                            id: userSummaryLabel
+
+                            width: parent.width
+                            text: root.systemInfo.userSummary
+                            elide: Text.ElideRight
+                            color: root.theme.drawerTitle
+                            font.family: root.theme.fontFamily
+                            font.pixelSize: root.theme.fontSize + 1
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            id: platformSummaryLabel
+
+                            width: parent.width
+                            text: root.systemInfo.platformSummary
+                            elide: Text.ElideRight
+                            color: root.theme.textSecondary
+                            font.family: root.theme.fontFamily
+                            font.pixelSize: root.theme.fontSize - 1
+                        }
+                    }
+                }
+
+                Row {
+                    id: headerActions
+
+                    anchors {
+                        top: parent.top
+                        topMargin: (root.theme.barHeight - root.theme.controlHeight) / 2
+                            + root.theme.barContentVerticalOffset
+                            + root.theme.controlHeight
+                            + 2
+                        right: parent.right
+                        rightMargin: root.theme.drawerPadding
+                    }
                     height: root.theme.controlHeight
-                    radius: root.theme.smallRadius
-                    color: powerMouse.containsMouse ? root.theme.criticalSurface : root.theme.controlBackground
+                    spacing: 2
 
-                    Behavior on color {
-                        ColorAnimation { duration: root.theme.animationFast }
+                    Tray {
+                        buttonWidth: 24
+                        panelWindow: root
+                        trayItems: root.trayItems
+                        theme: root.theme
+                        itemFilter: item => root.isBluetoothItem(item)
+                        glyphForItem: item => ""
                     }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: ""
-                        color: powerMouse.containsMouse ? root.theme.criticalSurfaceText : root.theme.powerAccent
-                        font.family: root.theme.fontFamily
-                        font.pixelSize: root.theme.iconSize
+                    Tray {
+                        buttonWidth: 24
+                        panelWindow: root
+                        trayItems: root.trayItems
+                        theme: root.theme
+                        itemFilter: item => root.isNetworkItem(item)
+                        glyphForItem: item => "󰖩"
                     }
 
-                    MouseArea {
-                        id: powerMouse
+                    Rectangle {
+                        id: powerButton
 
-                        anchors.fill: parent
-                        acceptedButtons: Qt.LeftButton
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        width: 24
+                        height: root.theme.controlHeight
+                        radius: root.theme.smallRadius
+                        color: powerMouse.containsMouse ? root.theme.criticalSurface : "transparent"
 
-                        onClicked: {
-                            Quickshell.execDetached([
-                                Quickshell.env("HOME") + "/.config/hypr/scripts/Wlogout.sh"
-                            ])
-                            root.visible = false
+                        Behavior on color {
+                            ColorAnimation { duration: root.theme.animationFast }
+                        }
+
+                        CenteredGlyph {
+                            anchors.fill: parent
+                            glyph: ""
+                            color: powerMouse.containsMouse
+                                ? root.theme.criticalSurfaceText
+                                : root.theme.powerAccent
+                            fontFamily: root.theme.fontFamily
+                            fontPixelSize: root.theme.iconSize
+                            opticalHorizontalOffset: 0.5
+                        }
+
+                        MouseArea {
+                            id: powerMouse
+
+                            anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: {
+                                Quickshell.execDetached([
+                                    Quickshell.env("HOME") + "/.config/hypr/scripts/Wlogout.sh"
+                                ])
+                                root.visible = false
+                            }
                         }
                     }
                 }
             }
 
-            Tray {
-                panelWindow: root
-                trayItems: root.trayItems
-                theme: root.theme
+            Rectangle {
+                x: root.theme.drawerPadding
+                width: parent.width - root.theme.drawerPadding * 2
+                height: 1
+                color: root.theme.divider
+            }
+
+
+            Rectangle {
+                id: applicationSurface
+
+                x: root.theme.drawerPadding
+                width: parent.width - root.theme.drawerPadding * 2
+                height: 32
+                implicitWidth: applicationTray.implicitWidth + 6
+                radius: root.theme.smallRadius
+                color: root.theme.controlBackground
+
+                Tray {
+                    id: applicationTray
+
+                    anchors {
+                        left: parent.left
+                        leftMargin: 3
+                        verticalCenter: parent.verticalCenter
+                    }
+                    panelWindow: root
+                    trayItems: root.trayItems
+                    theme: root.theme
+                    itemFilter: item => !root.isSystemItem(item)
+                }
             }
 
             Rectangle {
                 id: notificationButton
 
-                width: parent.width
+                x: root.theme.drawerPadding
+                width: parent.width - root.theme.drawerPadding * 2
                 height: 32
+                implicitWidth: notificationLabel.implicitWidth
+                    + notificationCount.implicitWidth
+                    + 28
                 radius: root.theme.smallRadius
                 color: notificationMouse.containsMouse ? root.theme.controlHover : root.theme.controlBackground
 
@@ -150,6 +278,8 @@ PopupWindow {
                 }
 
                 Text {
+                    id: notificationLabel
+
                     anchors {
                         left: parent.left
                         leftMargin: 9
@@ -162,6 +292,8 @@ PopupWindow {
                 }
 
                 Text {
+                    id: notificationCount
+
                     anchors {
                         right: parent.right
                         rightMargin: 9

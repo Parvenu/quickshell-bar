@@ -54,122 +54,20 @@ PanelWindow {
             theme: root.theme
         }
 
-        Text {
-            id: clockLabel
-
-            anchors {
-                right: statusSeparator.left
-                rightMargin: 8
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
-            }
-            text: Qt.formatDateTime(root.clock.date, "ddd, MMM dd · HH:mm:ss")
-            color: root.theme.clockText
-            font.family: root.theme.fontFamily
-            font.pixelSize: root.theme.fontSize
-            font.weight: Font.DemiBold
-        }
-
-        Rectangle {
-            id: clockSeparator
-
-            anchors {
-                right: clockLabel.left
-                rightMargin: 8
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
-            }
-            width: 1
-            height: 16
-            color: root.theme.divider
-        }
-
-        Rectangle {
-            id: drawerButton
+        StatusLine {
+            id: statusLine
 
             anchors {
                 right: parent.right
-                rightMargin: 8
+                rightMargin: root.theme.drawerPadding
                 verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
             }
-            width: 24
-            height: root.theme.controlHeight
-            radius: root.theme.smallRadius
-            color: drawerMouse.containsMouse ? root.theme.controlHover : "transparent"
-
-            Behavior on color {
-                ColorAnimation { duration: root.theme.animationFast }
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: ""
-                color: root.drawerOpen ? root.theme.drawerLauncherActive : root.theme.textPrimary
-                font.family: root.theme.fontFamily
-                font.pixelSize: root.theme.iconSize + 1
-            }
-
-            Rectangle {
-                anchors {
-                    bottom: parent.bottom
-                    bottomMargin: 1
-                    horizontalCenter: parent.horizontalCenter
-                }
-                width: 14
-                height: 2
-                radius: 1
-                visible: root.drawerOpen
-                color: root.theme.drawerLauncherActive
-            }
-
-            MouseArea {
-                id: drawerMouse
-
-                anchors.fill: parent
-                acceptedButtons: Qt.LeftButton
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.drawerOpen = !root.drawerOpen
-            }
-        }
-
-        Audio {
-            id: audioControls
-
-            anchors {
-                right: drawerButton.left
-                rightMargin: 4
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
-            }
+            theme: root.theme
+            clock: root.clock
             audio: root.audio
-            theme: root.theme
-        }
-
-        Rectangle {
-            id: statusSeparator
-
-            anchors {
-                right: audioControls.left
-                rightMargin: 8
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
-            }
-            width: 1
-            height: 16
-            color: root.theme.divider
-        }
-
-        Metrics {
-            anchors {
-                right: clockSeparator.left
-                rightMargin: 8
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
-            }
             metrics: root.metrics
-            theme: root.theme
+            drawerOpen: root.drawerOpen
+            onDrawerClicked: root.drawerOpen = !root.drawerOpen
         }
 
         LazyLoader {
@@ -177,10 +75,12 @@ PanelWindow {
 
             ControlDrawer {
                 panelWindow: root
-                anchorItem: drawerButton
+                anchorItem: statusLine
                 theme: root.theme
+                clock: root.clock
                 audio: root.audio
                 notifications: root.notifications
+                metrics: root.metrics
                 systemInfo: root.systemInfo
                 trayItems: root.trayItems
                 onDismissed: root.drawerOpen = false
