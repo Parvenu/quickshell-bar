@@ -25,6 +25,7 @@ PanelWindow {
     }
 
     implicitHeight: root.theme.barHeight
+    exclusiveZone: root.theme.barExclusiveZone
     color: "transparent"
 
     Rectangle {
@@ -48,7 +49,6 @@ PanelWindow {
                 left: parent.left
                 leftMargin: 6
                 verticalCenter: parent.verticalCenter
-                verticalCenterOffset: root.theme.barContentVerticalOffset
             }
             monitor: root.monitor
             theme: root.theme

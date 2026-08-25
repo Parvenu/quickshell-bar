@@ -4,7 +4,7 @@ import QtQuick
 
 QtObject {
     readonly property string name: "Tokyo Night"
-    readonly property int barContentVerticalOffset: 0
+    readonly property int barExclusiveZone: 30
 
     readonly property color barBackground: "#1a1b26"
     readonly property color barBorder: "#3b4261"

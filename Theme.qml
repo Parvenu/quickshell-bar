@@ -13,7 +13,7 @@ QtObject {
     readonly property int iconSize: 14
 
     readonly property int barHeight: 30
-    readonly property int barContentVerticalOffset: scheme.barContentVerticalOffset
+    readonly property int barExclusiveZone: scheme.barExclusiveZone
     readonly property int controlHeight: 24
     readonly property int smallRadius: 4
     readonly property int drawerRadius: 8

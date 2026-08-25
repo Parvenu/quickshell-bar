@@ -4,7 +4,7 @@ import QtQuick
 
 QtObject {
     readonly property string name: "Rosé Pine"
-    readonly property int barContentVerticalOffset: 0
+    readonly property int barExclusiveZone: 30
 
     readonly property color barBackground: "#191724"
     readonly property color barBorder: "#6e6a86"

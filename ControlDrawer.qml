@@ -159,7 +159,6 @@ PopupWindow {
                     anchors {
                         top: parent.top
                         topMargin: (root.theme.barHeight - root.theme.controlHeight) / 2
-                            + root.theme.barContentVerticalOffset
                             + root.theme.controlHeight
                             + 2
                         right: parent.right

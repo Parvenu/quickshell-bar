@@ -23,7 +23,6 @@ Item {
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         metrics: root.metrics
         theme: root.theme
@@ -36,7 +35,6 @@ Item {
             left: metricsDisplay.right
             leftMargin: 8
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         width: 1
         height: 16
@@ -50,7 +48,6 @@ Item {
             left: clockSeparator.right
             leftMargin: 8
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         text: Qt.formatDateTime(root.clock.date, "ddd, MMM dd · HH:mm:ss")
         color: root.theme.clockText
@@ -66,7 +63,6 @@ Item {
             left: clockLabel.right
             leftMargin: 8
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         width: 1
         height: 16
@@ -80,7 +76,6 @@ Item {
             left: statusSeparator.right
             leftMargin: 8
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         audio: root.audio
         theme: root.theme
@@ -93,7 +88,6 @@ Item {
             left: audioControls.right
             leftMargin: 2
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: root.theme.barContentVerticalOffset
         }
         width: 24
         height: root.theme.controlHeight
