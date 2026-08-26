@@ -16,6 +16,7 @@ Item {
     property var itemFilter: item => true
     property var glyphForItem: item => ""
     property int buttonWidth: 26
+    property real glyphHorizontalOffset: 0
 
     function iconName(source): string {
         const value = source.toString()
@@ -119,6 +120,7 @@ Item {
                     fontFamily: root.theme.fontFamily
                     fontPixelSize: root.theme.iconSize
                     fontWeight: Font.DemiBold
+                    opticalHorizontalOffset: root.glyphHorizontalOffset
                     visible: trayButton.glyph.length > 0
                 }
 

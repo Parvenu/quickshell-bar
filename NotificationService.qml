@@ -28,6 +28,10 @@ QtObject {
         Quickshell.execDetached(["swaync-client", "--open-panel", "--skip-wait"])
     }
 
+    function toggleDnd(): void {
+        Quickshell.execDetached(["swaync-client", "--toggle-dnd"])
+    }
+
     property Process subscriber: Process {
         command: ["swaync-client", "--subscribe"]
         running: true
