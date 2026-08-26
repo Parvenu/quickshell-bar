@@ -11,10 +11,18 @@ Item {
     required property var metrics
 
     property bool drawerOpen: false
+    property bool showAudioControls: true
+    property bool showDrawerButton: true
 
     signal drawerClicked()
 
-    implicitWidth: drawerButton.x + drawerButton.width
+    implicitWidth: {
+        if (root.showDrawerButton)
+            return drawerButton.x + drawerButton.width
+        if (root.showAudioControls)
+            return audioControls.x + audioControls.width
+        return clockLabel.x + clockLabel.width
+    }
     implicitHeight: root.theme.barHeight
 
     Metrics {
@@ -67,6 +75,7 @@ Item {
         width: 1
         height: 16
         color: root.theme.divider
+        visible: root.showAudioControls
     }
 
     Audio {
@@ -79,20 +88,22 @@ Item {
         }
         audio: root.audio
         theme: root.theme
+        visible: root.showAudioControls
     }
 
     Rectangle {
         id: drawerButton
 
         anchors {
-            left: audioControls.right
-            leftMargin: 2
+            left: root.showAudioControls ? audioControls.right : clockLabel.right
+            leftMargin: root.showAudioControls ? 2 : 8
             verticalCenter: parent.verticalCenter
         }
         width: 24
         height: root.theme.controlHeight
         radius: root.theme.smallRadius
         color: drawerMouse.containsMouse ? root.theme.controlHover : "transparent"
+        visible: root.showDrawerButton
 
         Behavior on color {
             ColorAnimation { duration: root.theme.animationFast }

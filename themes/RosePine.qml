@@ -19,6 +19,7 @@ QtObject {
     readonly property color clockText: "#9ccfd8"
     readonly property color drawerTitle: "#ebbcba"
     readonly property color drawerLauncherActive: "#9ccfd8"
+    readonly property color calendarHoliday: "#f6c177"
 
     readonly property color focusedWorkspace: "#9ccfd8"
     readonly property color activeWorkspace: "#c4a7e7"

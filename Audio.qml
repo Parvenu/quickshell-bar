@@ -8,6 +8,14 @@ Row {
     required property var audio
     required property var theme
 
+    readonly property string hoveredControlLabel: {
+        if (speakerMouse.containsMouse)
+            return root.audio.sinkMuted ? "Volume muted" : `Volume ${root.audio.sinkVolume}%`
+        if (microphoneMouse.containsMouse)
+            return root.audio.sourceMuted ? "Microphone muted" : "Microphone"
+        return ""
+    }
+
     spacing: 2
 
     Rectangle {

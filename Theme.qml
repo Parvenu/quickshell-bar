@@ -36,6 +36,7 @@ QtObject {
     readonly property color clockText: scheme.clockText
     readonly property color drawerTitle: scheme.drawerTitle
     readonly property color drawerLauncherActive: scheme.drawerLauncherActive
+    readonly property color calendarHoliday: scheme.calendarHoliday
 
     readonly property color focusedWorkspace: scheme.focusedWorkspace
     readonly property color activeWorkspace: scheme.activeWorkspace
