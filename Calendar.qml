@@ -266,7 +266,7 @@ Rectangle {
                         color: dayCell.isHoliday
                             ? root.theme.calendarHoliday
                             : dayCell.isToday
-                                ? root.theme.drawerLauncherActive
+                                ? root.theme.textPrimary
                                 : dayCell.inDisplayedMonth
                                     ? root.theme.textPrimary
                                     : root.theme.textMuted

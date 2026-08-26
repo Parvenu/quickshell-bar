@@ -44,7 +44,7 @@ PopupWindow {
         Quickshell.execDetached(command)
     }
 
-    implicitWidth: Math.ceil(root.anchorItem.width) + root.theme.drawerPadding * 2
+    implicitWidth: root.anchorItem.width + root.theme.drawerPadding * 2
     implicitHeight: contentColumn.implicitHeight + 10
     color: "transparent"
     grabFocus: true
@@ -60,7 +60,6 @@ PopupWindow {
         gravity: Edges.Bottom | Edges.Left
         adjustment: PopupAdjustment.None
     }
-
 
     Component.onCompleted: visible = true
     onVisibleChanged: {
@@ -99,6 +98,8 @@ PopupWindow {
                     anchors {
                         left: parent.left
                         leftMargin: root.theme.drawerPadding
+                            + Math.floor(root.anchorItem.width)
+                            - root.anchorItem.width
                         verticalCenter: parent.verticalCenter
                     }
                     theme: root.theme

@@ -88,6 +88,7 @@ Item {
         }
         audio: root.audio
         theme: root.theme
+        accentOnHover: true
         visible: root.showAudioControls
     }
 
@@ -102,17 +103,15 @@ Item {
         width: 24
         height: root.theme.controlHeight
         radius: root.theme.smallRadius
-        color: drawerMouse.containsMouse ? root.theme.controlHover : "transparent"
+        color: "transparent"
         visible: root.showDrawerButton
-
-        Behavior on color {
-            ColorAnimation { duration: root.theme.animationFast }
-        }
 
         CenteredGlyph {
             anchors.fill: parent
             glyph: ""
-            color: root.drawerOpen ? root.theme.drawerLauncherActive : root.theme.textPrimary
+            color: root.drawerOpen || drawerMouse.containsMouse
+                ? root.theme.drawerLauncherActive
+                : root.theme.textPrimary
             fontFamily: root.theme.fontFamily
             fontPixelSize: root.theme.iconSize + 1
         }

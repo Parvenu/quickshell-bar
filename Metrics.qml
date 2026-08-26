@@ -29,7 +29,7 @@ Row {
 
             anchors.verticalCenter: parent.verticalCenter
             text: `${usage}%`
-            color: usage >= 90 ? root.theme.criticalText : root.theme.textSecondary
+            color: usage >= 90 ? root.theme.criticalText : root.theme.textPrimary
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.fontSize
             font.weight: Font.DemiBold
@@ -58,7 +58,7 @@ Row {
                     return root.theme.criticalText
                 if (temperature >= 70)
                     return root.theme.warningText
-                return root.theme.textSecondary
+                return root.theme.textPrimary
             }
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.fontSize
@@ -84,7 +84,7 @@ Row {
 
             anchors.verticalCenter: parent.verticalCenter
             text: `${usedGiB.toFixed(1)}G`
-            color: usage >= 90 ? root.theme.criticalText : root.theme.textSecondary
+            color: usage >= 90 ? root.theme.criticalText : root.theme.textPrimary
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.fontSize
             font.weight: Font.DemiBold

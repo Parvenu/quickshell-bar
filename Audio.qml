@@ -8,6 +8,8 @@ Row {
     required property var audio
     required property var theme
 
+    property bool accentOnHover: false
+
     readonly property string hoveredControlLabel: {
         if (speakerMouse.containsMouse)
             return root.audio.sinkMuted ? "Volume muted" : `Volume ${root.audio.sinkVolume}%`
@@ -35,7 +37,9 @@ Row {
         width: 24
         height: root.theme.controlHeight
         radius: root.theme.smallRadius
-        color: speakerMouse.containsMouse ? root.theme.controlHover : "transparent"
+        color: speakerMouse.containsMouse && !root.accentOnHover
+            ? root.theme.controlHover
+            : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.theme.animationFast }
@@ -44,7 +48,11 @@ Row {
         CenteredGlyph {
             anchors.fill: parent
             glyph: speakerButton.icon
-            color: root.audio.sinkMuted ? root.theme.textMuted : root.theme.audioOutputAccent
+            color: speakerMouse.containsMouse && root.accentOnHover
+                ? root.theme.drawerLauncherActive
+                : root.audio.sinkMuted
+                    ? root.theme.textMuted
+                    : root.theme.audioOutputAccent
             fontFamily: root.theme.fontFamily
             fontPixelSize: root.theme.iconSize
             fontWeight: Font.DemiBold
@@ -74,7 +82,9 @@ Row {
         width: 24
         height: root.theme.controlHeight
         radius: root.theme.smallRadius
-        color: microphoneMouse.containsMouse ? root.theme.controlHover : "transparent"
+        color: microphoneMouse.containsMouse && !root.accentOnHover
+            ? root.theme.controlHover
+            : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.theme.animationFast }
@@ -83,7 +93,11 @@ Row {
         CenteredGlyph {
             anchors.fill: parent
             glyph: root.audio.sourceAvailable && !root.audio.sourceMuted ? "" : ""
-            color: root.audio.sourceMuted ? root.theme.textMuted : root.theme.audioInputAccent
+            color: microphoneMouse.containsMouse && root.accentOnHover
+                ? root.theme.drawerLauncherActive
+                : root.audio.sourceMuted
+                    ? root.theme.textMuted
+                    : root.theme.audioInputAccent
             fontFamily: root.theme.fontFamily
             fontPixelSize: root.theme.iconSize
             fontWeight: Font.DemiBold
