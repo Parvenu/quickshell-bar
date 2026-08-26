@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <defs>
+    <mask id="base-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+      <rect width="32" height="32" fill="#fff"/>
+      <circle cx="21.875" cy="9.875" r="8.65" fill="#000"/>
+    </mask>
+    <mask id="badge-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+      <rect width="32" height="32" fill="#fff"/>
+      <path d="m18.3 9.5 2.7 2.7 5-5" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <path fill="#cecece" fill-rule="evenodd" mask="url(#base-cutout)" d="M13.2468 27.1104C14.3109 29.0115 17.0437 29.1144 18.2518 27.299L29.5173 10.3706C30.7119 8.57542 29.5689 6.16857 27.4055 5.92395L5.26304 3.42027C2.90232 3.15334 1.22148 5.62703 2.36971 7.67836L13.2468 27.1104Z"/>
+  <circle cx="21.875" cy="9.875" r="7.75" fill="#cecece" mask="url(#badge-cutout)"/>
+</svg>
