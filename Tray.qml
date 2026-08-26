@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
+
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
@@ -18,47 +18,47 @@ Item {
     property int buttonWidth: 26
     property real glyphHorizontalOffset: 0
 
-    function iconName(source): string {
-        const value = source.toString()
-        const pathStart = value.lastIndexOf("/") + 1
-        const queryStart = value.indexOf("?", pathStart)
-        return value.slice(pathStart, queryStart >= 0 ? queryStart : value.length)
-    }
-
-    function preferredIconName(item): string {
+    function customizedApplication(item): string {
         const id = String(item?.id ?? "").toLowerCase()
-        if (id.startsWith("discord"))
+        if (id.startsWith("discord_status_icon_"))
             return "discord"
         if (id === "steam")
             return "steam"
+        if (id === "wayscriber")
+            return "wayscriber"
+        if (id === "proton.vpn.app.gtk")
+            return "proton"
         return ""
     }
 
-    function resolvedIconSource(item): string {
-        const id = String(item?.id ?? "").toLowerCase()
-        if (id === "wayscriber")
-            return "file:///usr/share/icons/hicolor/symbolic/apps/wayscriber-symbolic.svg"
-
-        const preferredName = preferredIconName(item)
-        if (preferredName.length > 0) {
-            const preferredIcon = Quickshell.iconPath(preferredName, true)
-            if (preferredIcon.length > 0)
-                return preferredIcon
-        }
-
-        const value = item.icon.toString()
-        const name = iconName(value)
-        if (!name.endsWith("-symbolic"))
-            return value
-
-        const regularName = name.slice(0, -"-symbolic".length)
-        const regularIcon = Quickshell.iconPath(regularName, true)
-        return regularIcon.length > 0 ? regularIcon : value
+    function protonState(item): string {
+        const source = String(item?.icon ?? "").toLowerCase()
+        if (source.includes("state-error"))
+            return "error"
+        if (source.includes("state-connected"))
+            return "connected"
+        return "disconnected"
     }
 
-    function isSymbolicIcon(item, source): bool {
-        const id = String(item?.id ?? "").toLowerCase()
-        return id === "wayscriber" || iconName(source).endsWith("-symbolic")
+    function resolvedIconSource(item): string {
+        const application = customizedApplication(item)
+        if (application === "discord")
+            return Qt.resolvedUrl("assets/tray/discord.svg").toString()
+        if (application === "wayscriber")
+            return Qt.resolvedUrl("assets/tray/wayscriber.svg").toString()
+        if (application === "proton")
+            return Qt.resolvedUrl(
+                "assets/tray/proton-" + protonState(item) + ".svg"
+            ).toString()
+        if (application === "steam")
+            return Qt.resolvedUrl("assets/tray/steam.svg").toString()
+        return item.icon.toString()
+    }
+
+
+    function isErrorIcon(item): bool {
+        return customizedApplication(item) === "proton"
+            && protonState(item) === "error"
     }
 
     implicitWidth: trayRow.implicitWidth
@@ -77,16 +77,16 @@ Item {
                 required property var modelData
                 readonly property var trayItem: modelData
                 readonly property bool needsAttention: trayItem.status === Status.NeedsAttention
+                readonly property bool highlighted: needsAttention || root.isErrorIcon(trayItem)
                 readonly property string glyph: root.glyphForItem(trayItem)
                 readonly property string iconSource: root.resolvedIconSource(trayItem)
-                readonly property bool symbolicIcon: root.isSymbolicIcon(trayItem, iconSource)
 
                 visible: root.itemFilter(trayItem)
                 width: root.buttonWidth
                 height: root.theme.controlHeight
                 radius: root.theme.smallRadius
                 color: trayMouse.containsMouse ? root.theme.controlHover : "transparent"
-                border.width: needsAttention ? 1 : 0
+                border.width: highlighted ? 1 : 0
                 border.color: root.theme.trayAttention
 
                 Behavior on color {
@@ -101,20 +101,12 @@ Item {
                     source: trayButton.iconSource
                     asynchronous: true
                     visible: trayButton.glyph.length === 0 && source.toString().length > 0
-                    layer.enabled: trayButton.symbolicIcon
-                    layer.effect: MultiEffect {
-                        brightness: 1
-                        colorization: 1
-                        colorizationColor: trayButton.needsAttention
-                            ? root.theme.trayAttention
-                            : root.theme.textPrimary
-                    }
                 }
 
                 CenteredGlyph {
                     anchors.fill: parent
                     glyph: trayButton.glyph
-                    color: trayButton.needsAttention
+                    color: trayButton.highlighted
                         ? root.theme.trayAttention
                         : root.theme.textPrimary
                     fontFamily: root.theme.fontFamily
@@ -129,7 +121,7 @@ Item {
                     text: trayButton.trayItem.title.length > 0
                         ? trayButton.trayItem.title.slice(0, 1).toUpperCase()
                         : "?"
-                    color: trayButton.needsAttention
+                    color: trayButton.highlighted
                         ? root.theme.trayAttention
                         : root.theme.textSecondary
                     font.family: root.theme.fontFamily
