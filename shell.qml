@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 ShellRoot {
     id: root
@@ -15,6 +16,10 @@ ShellRoot {
     readonly property alias systemInfo: systemInfoService
     readonly property alias sessionControls: sessionControlsService
     readonly property alias trayItems: trayService.items
+
+    signal openDashboardRequested()
+    signal openNotificationsRequested()
+    signal closeDrawerRequested()
 
     Theme {
         id: themeModel
@@ -49,6 +54,30 @@ ShellRoot {
         precision: SystemClock.Seconds
     }
 
+    IpcHandler {
+        target: "bar"
+
+        function openDashboard(): void {
+            root.openDashboardRequested()
+        }
+
+        function openNotifications(): void {
+            root.openNotificationsRequested()
+        }
+
+        function closeDrawer(): void {
+            root.closeDrawerRequested()
+        }
+
+        function setDoNotDisturb(enabled: bool): void {
+            root.notifications.dnd = enabled
+        }
+
+        function clearNotifications(): void {
+            root.notifications.dismissAll()
+        }
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -56,6 +85,7 @@ ShellRoot {
             Bar {
                 required property var modelData
                 screen: modelData
+                commandBus: root
                 theme: root.theme
                 clock: root.systemClock
                 audio: root.audio

@@ -17,7 +17,10 @@ A compact, multi-monitor Hyprland status bar built with [Quickshell](https://qui
   - Inline lock, suspend, hibernate, reboot, and shutdown actions
   - Separate application tray and menus
   - Local month calendar and Proton Calendar web launcher
-  - SwayNC notification count and control-center launcher
+  - Native notification history in a fixed-height page that preserves the drawer frame
+  - DND, unread state, individual dismiss, and clear-all controls
+- Native Freedesktop notification daemon with focused-monitor toasts
+- Default and alternate actions, notification images, progress hints, and inline replies
 - Shared service objects rather than one service instance per monitor
 - Lazy-loaded control drawers
 - Semantic, swappable color schemes:
@@ -32,7 +35,6 @@ The current configuration is tested with:
 - Quickshell 0.3.1
 - Hyprland 0.56.2
 - PipeWire
-- SwayNC
 - `hyprlock`
 - `pavucontrol`
 - `kitty`
@@ -80,7 +82,37 @@ This expression is intentional. If Hyprland is using the legacy configuration pr
 
 Only one StatusNotifier host should run at a time. Stop Waybar or disable its tray module before starting this bar if it would otherwise compete for `org.kde.StatusNotifierWatcher`.
 
-SwayNC remains the notification daemon and owns `org.freedesktop.Notifications`; this bar only subscribes to SwayNC state and opens its control center.
+This configuration is the notification daemon and owns `org.freedesktop.Notifications`. Do not run SwayNC, Mako, Dunst, or another notification server at the same time.
+
+When migrating from SwayNC, remove its startup and reload commands, then prevent D-Bus activation from reclaiming the name:
+
+```bash
+systemctl --user mask swaync.service
+pkill -x swaync
+```
+
+A typical Hyprland binding for the native notification page is:
+
+```ini
+bindd = $mainMod SHIFT, N, notification panel, exec, qs ipc -c bar call bar openNotifications
+```
+
+The bar exposes these IPC controls:
+
+```bash
+qs ipc -c bar call bar openDashboard
+qs ipc -c bar call bar openNotifications
+qs ipc -c bar call bar closeDrawer
+qs ipc -c bar call bar setDoNotDisturb true
+qs ipc -c bar call bar setDoNotDisturb false
+qs ipc -c bar call bar clearNotifications
+```
+
+Normal notification history is retained for the active session and survives QML hot reloads. It is not serialized across logout or reboot. Transient notifications, including volume and brightness indicators, are shown as toasts but intentionally excluded from history. Critical notifications and existing `SWAYNC_BYPASS_DND` hints bypass DND.
+
+Notification cards invoke Freedesktop default actions on click, expose alternative actions as buttons, and show an inline reply field when the sending application provides one. Whether a click opens a specific email, chat, or application is determined by the action supplied by that application.
+
+> **Quickshell 0.3.1 limitation:** an application replacement can retain a stale changed action label or inline-reply placeholder, and a completely identical replacement emits no update signal to restart the toast timer. These are upstream notification-service limitations rather than local presentation behavior.
 
 ## Calendar integration
 
@@ -118,6 +150,9 @@ bar/
 ├── Metrics.qml
 ├── MetricsService.qml
 ├── NotificationService.qml
+├── NotificationCard.qml
+├── NotificationPage.qml
+├── NotificationToastHost.qml
 ├── SessionControlsService.qml
 ├── SystemInfoService.qml
 ├── Tray.qml

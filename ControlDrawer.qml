@@ -18,8 +18,16 @@ PopupWindow {
     required property var trayItems
 
     property bool powerMenuOpen: false
+    property bool notificationPageOpen: false
 
+    signal dashboardRequested()
+    signal notificationsRequested()
     signal dismissed()
+
+    onNotificationPageOpenChanged: {
+        if (notificationPageOpen)
+            powerMenuOpen = false
+    }
 
     function trayItemId(item): string {
         return String(item?.id ?? "").toLowerCase()
@@ -138,6 +146,20 @@ PopupWindow {
                     onClicked: root.visible = false
                 }
             }
+
+            Item {
+                id: pageViewport
+
+                width: parent.width
+                height: root.theme.drawerBodyHeight
+                clip: true
+
+                Column {
+                    id: dashboardPage
+
+                    anchors.fill: parent
+                    spacing: 6
+                    visible: !root.notificationPageOpen
 
             Item {
                 id: identityRow
@@ -484,64 +506,168 @@ PopupWindow {
                     root.visible = false
                 }
             }
+                }
 
+                NotificationPage {
+                    x: root.theme.drawerPadding
+                    width: parent.width - root.theme.drawerPadding * 2
+                    height: parent.height
+                    visible: root.notificationPageOpen
+                    theme: root.theme
+                    notifications: root.notifications
+                }
+            }
 
             Rectangle {
-                id: notificationButton
+                id: drawerNavigationRow
 
                 x: root.theme.drawerPadding
                 width: parent.width - root.theme.drawerPadding * 2
                 height: 32
-                implicitWidth: notificationLabel.implicitWidth
-                    + notificationCount.implicitWidth
-                    + 28
                 radius: root.theme.smallRadius
-                color: notificationMouse.containsMouse ? root.theme.controlHover : root.theme.controlBackground
+                color: root.theme.controlBackground
+                clip: true
 
-                Behavior on color {
-                    ColorAnimation { duration: root.theme.animationFast }
-                }
-
-                Text {
-                    id: notificationLabel
-
-                    anchors {
-                        left: parent.left
-                        leftMargin: 9
-                        verticalCenter: parent.verticalCenter
-                    }
-                    text: "  Notifications"
-                    color: root.theme.textPrimary
-                    font.family: root.theme.fontFamily
-                    font.pixelSize: root.theme.fontSize
-                }
-
-                Text {
-                    id: notificationCount
-
-                    anchors {
-                        right: parent.right
-                        rightMargin: 9
-                        verticalCenter: parent.verticalCenter
-                    }
-                    text: root.notifications.count > 0 ? root.notifications.count : ""
-                    color: root.theme.notificationAccent
-                    font.family: root.theme.fontFamily
-                    font.pixelSize: root.theme.fontSize
-                    font.weight: Font.DemiBold
-                }
-
-                MouseArea {
-                    id: notificationMouse
-
+                Item {
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    visible: !root.notificationPageOpen
 
-                    onClicked: {
-                        root.notifications.openControlCenter()
-                        root.visible = false
+                    Text {
+                        anchors {
+                            left: parent.left
+                            leftMargin: 9
+                            verticalCenter: parent.verticalCenter
+                        }
+                        text: "  Notifications"
+                        color: dashboardNavigationMouse.containsMouse
+                            ? root.theme.notificationAccent
+                            : root.theme.textPrimary
+                        font.family: root.theme.fontFamily
+                        font.pixelSize: root.theme.fontSize
+                    }
+
+                    Text {
+                        anchors {
+                            right: parent.right
+                            rightMargin: 9
+                            verticalCenter: parent.verticalCenter
+                        }
+                        text: root.notifications.count > 0 ? root.notifications.count : ""
+                        color: root.theme.notificationAccent
+                        font.family: root.theme.fontFamily
+                        font.pixelSize: root.theme.fontSize
+                        font.weight: Font.DemiBold
+                    }
+
+                    MouseArea {
+                        id: dashboardNavigationMouse
+
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.notificationsRequested()
+                    }
+                }
+
+                Item {
+                    anchors.fill: parent
+                    visible: root.notificationPageOpen
+
+                    DrawerActionButton {
+                        id: notificationBackButton
+
+                        anchors {
+                            left: parent.left
+                            leftMargin: 4
+                            verticalCenter: parent.verticalCenter
+                        }
+                        theme: root.theme
+                        glyph: ""
+                        inactiveGlyphColor: root.theme.notificationAccent
+                        onClicked: root.dashboardRequested()
+                    }
+
+                    Rectangle {
+                        id: notificationBackSurface
+
+                        anchors {
+                            top: parent.top
+                            bottom: parent.bottom
+                            left: notificationBackButton.right
+                            leftMargin: 2
+                            right: notificationDndButton.left
+                            rightMargin: 2
+                        }
+                        radius: root.theme.smallRadius
+                        color: notificationBackMouse.containsMouse
+                            ? root.theme.controlHover
+                            : "transparent"
+
+                        Text {
+                            anchors {
+                                left: parent.left
+                                leftMargin: 6
+                                right: parent.right
+                                rightMargin: 6
+                                verticalCenter: parent.verticalCenter
+                            }
+                            text: "Notifications"
+                                + (root.notifications.count > 0
+                                    ? "  " + root.notifications.count
+                                    : "")
+                            elide: Text.ElideRight
+                            color: notificationBackMouse.containsMouse
+                                ? root.theme.notificationAccent
+                                : root.theme.textPrimary
+                            font.family: root.theme.fontFamily
+                            font.pixelSize: root.theme.fontSize
+                            font.weight: Font.DemiBold
+                        }
+
+                        MouseArea {
+                            id: notificationBackMouse
+
+                            anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.dashboardRequested()
+                        }
+                    }
+
+                    DrawerActionButton {
+                        id: notificationDndButton
+
+                        anchors {
+                            right: notificationClearButton.left
+                            rightMargin: 2
+                            verticalCenter: parent.verticalCenter
+                        }
+                        theme: root.theme
+                        glyph: root.notifications.dnd ? "󰂛" : "󰂚"
+                        active: root.notifications.dnd
+                        activeGlyphColor: root.theme.notificationAccent
+                        onClicked: root.notifications.toggleDnd()
+                    }
+
+                    DrawerActionButton {
+                        id: notificationClearButton
+
+                        anchors {
+                            right: parent.right
+                            rightMargin: 4
+                            verticalCenter: parent.verticalCenter
+                        }
+                        theme: root.theme
+                        glyph: "󰆴"
+                        inactiveGlyphColor: root.notifications.count > 0
+                            ? root.theme.criticalText
+                            : root.theme.textMuted
+                        onClicked: {
+                            if (root.notifications.count > 0)
+                                root.notifications.dismissAll()
+                        }
                     }
                 }
             }
@@ -550,9 +676,19 @@ PopupWindow {
         Item {
             id: powerMenuDismissLayer
 
-            readonly property real controlsTop: controlsSurface.y
-            readonly property real controlsBottom: controlsSurface.y + controlsSurface.height
-            readonly property real actionsLeft: controlsSurface.x + powerActions.x
+            readonly property point controlsOrigin: controlsSurface.mapToItem(
+                powerMenuDismissLayer,
+                0,
+                0
+            )
+            readonly property point actionsOrigin: powerActions.mapToItem(
+                powerMenuDismissLayer,
+                0,
+                0
+            )
+            readonly property real controlsTop: controlsOrigin.y
+            readonly property real controlsBottom: controlsTop + controlsSurface.height
+            readonly property real actionsLeft: actionsOrigin.x
             readonly property real actionsRight: actionsLeft + powerActions.width
 
             anchors.fill: parent

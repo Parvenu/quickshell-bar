@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 PanelWindow {
     id: root
 
+    required property var commandBus
     required property var theme
     required property var clock
     required property var audio
@@ -17,7 +18,75 @@ PanelWindow {
     required property var trayItems
 
     property bool drawerOpen: false
+    property bool drawerContentActive: false
+    property bool notificationPageOpen: false
     readonly property var monitor: Hyprland.monitorFor(root.screen)
+
+    function openDashboard(): void {
+        notificationPageOpen = false
+        drawerOpen = true
+    }
+
+    function openNotifications(): void {
+        notificationPageOpen = true
+        drawerOpen = true
+    }
+
+    function closeDrawer(): void {
+        drawerOpen = false
+    }
+
+    function toggleDashboard(): void {
+        if (drawerOpen && !notificationPageOpen)
+            closeDrawer()
+        else
+            openDashboard()
+    }
+
+    onDrawerOpenChanged: {
+        if (!drawerOpen) {
+            notificationPageOpen = false
+            drawerContentActive = false
+            drawerActivationDelay.stop()
+            return
+        }
+
+        drawerContentActive = false
+        drawerActivationDelay.restart()
+    }
+
+    Timer {
+        id: drawerActivationDelay
+
+        interval: 20
+        repeat: false
+        onTriggered: {
+            if (root.drawerOpen)
+                root.drawerContentActive = true
+        }
+    }
+
+    Connections {
+        target: root.commandBus
+
+        function onOpenDashboardRequested(): void {
+            if (root.monitor?.focused)
+                root.openDashboard()
+            else
+                root.closeDrawer()
+        }
+
+        function onOpenNotificationsRequested(): void {
+            if (root.monitor?.focused)
+                root.openNotifications()
+            else
+                root.closeDrawer()
+        }
+
+        function onCloseDrawerRequested(): void {
+            root.closeDrawer()
+        }
+    }
 
     anchors {
         top: true
@@ -68,11 +137,20 @@ PanelWindow {
             audio: root.audio
             metrics: root.metrics
             drawerOpen: root.drawerOpen
-            onDrawerClicked: root.drawerOpen = !root.drawerOpen
+            onDrawerClicked: root.toggleDashboard()
+        }
+
+        NotificationToastHost {
+            panelWindow: root
+            anchorItem: statusLine
+            monitor: root.monitor
+            theme: root.theme
+            notifications: root.notifications
+            drawerOpen: root.drawerOpen
         }
 
         LazyLoader {
-            active: root.drawerOpen
+            active: root.drawerContentActive
 
             ControlDrawer {
                 panelWindow: root
@@ -85,7 +163,10 @@ PanelWindow {
                 systemInfo: root.systemInfo
                 sessionControls: root.sessionControls
                 trayItems: root.trayItems
-                onDismissed: root.drawerOpen = false
+                notificationPageOpen: root.notificationPageOpen
+                onDashboardRequested: root.openDashboard()
+                onNotificationsRequested: root.openNotifications()
+                onDismissed: root.closeDrawer()
             }
         }
     }

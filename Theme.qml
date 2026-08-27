@@ -18,6 +18,7 @@ QtObject {
     readonly property int smallRadius: 4
     readonly property int drawerRadius: 8
     readonly property int drawerPadding: 10
+    readonly property int drawerBodyHeight: 343
     readonly property int workspaceIndicatorWidth: 10
     readonly property int workspaceIndicatorHeight: 1
     readonly property int workspaceIndicatorGap: 0
