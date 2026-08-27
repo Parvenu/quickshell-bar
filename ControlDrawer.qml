@@ -77,6 +77,13 @@ PopupWindow {
         }
     }
 
+    Shortcut {
+        sequence: "Escape"
+        context: Qt.WindowShortcut
+        enabled: root.visible
+        onActivated: root.visible = false
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: root.theme.drawerRadius
