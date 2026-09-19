@@ -35,6 +35,9 @@ The current configuration is tested with:
 - Quickshell 0.3.1
 - Hyprland 0.56.2
 - PipeWire
+- NetworkManager Applet (`nm-applet`)
+- Blueman
+- Adwaita icon theme
 - `hyprlock`
 - `pavucontrol`
 - `kitty`
@@ -45,7 +48,7 @@ The current configuration is tested with:
 
 The drawer power button launches `~/.config/hypr/scripts/PowerMenu.sh`. The menu queries logind so unsupported actions are hidden and asks the bar to map click-through blur backdrops on the non-menu outputs. Selecting an action executes it immediately; locking invokes `hyprlock --quiet` directly.
 
-The temperature service currently discovers the AMD `k10temp/Tccd1` sensor. Systems without that sensor will show `--°C` until `MetricsService.qml` is adapted to their hardware.
+The temperature service discovers AMD CPUs through the `k10temp` hwmon device and reads its standard `Tctl` value from `temp1_input`. Systems without `k10temp` will show `--°C` until `MetricsService.qml` is adapted to their hardware.
 
 ## Installation
 

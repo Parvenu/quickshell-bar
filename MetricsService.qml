@@ -145,7 +145,7 @@ QtObject {
         command: [
             "sh",
             "-c",
-            "grep -l '^Tccd1$' /sys/class/hwmon/hwmon*/temp*_label | sed 's/_label$/_input/'"
+            "grep -l '^k10temp$' /sys/class/hwmon/hwmon*/name | sed 's|/name$|/temp1_input|'"
         ]
         running: true
 

@@ -1,0 +1,26 @@
+[Icon Theme]
+Name=Rose Pine Quickshell
+Comment=Rosé Pine icon overrides for Quickshell platform menus
+Inherits=Adwaita,hicolor
+Directories=symbolic/actions,symbolic/devices,symbolic/mimetypes
+
+[symbolic/actions]
+Context=Actions
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[symbolic/devices]
+Context=Devices
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[symbolic/mimetypes]
+Context=MimeTypes
+Size=16
+MinSize=8
+MaxSize=512
+Type=Scalable

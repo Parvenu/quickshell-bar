@@ -34,7 +34,10 @@ PopupWindow {
 
     function isNetworkItem(item): bool {
         const id = trayItemId(item)
+        const title = String(item?.title ?? "").toLowerCase()
         return id === "nm-applet" || id === "nm_applet"
+            || id.includes("networkmanager")
+            || title.includes("networkmanager")
     }
 
     function isSystemItem(item): bool {

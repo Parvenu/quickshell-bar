@@ -1,4 +1,5 @@
 //@ pragma UseQApplication
+//@ pragma IconTheme RosePineQuickshell
 pragma ComponentBehavior: Bound
 
 import QtQuick
