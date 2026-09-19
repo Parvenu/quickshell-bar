@@ -67,6 +67,17 @@ Rectangle {
         if (lowerSource.startsWith("data:") && !lowerSource.startsWith("data:image/"))
             return ""
 
+        // Notification image-path hints are exposed as image://icon URLs. The
+        // provider returns a missing-texture pixmap with Ready status when an
+        // icon is absent, so resolve simple icon requests with an existence
+        // check here to allow the glyph fallback below to take over.
+        const iconProviderPrefix = "image://icon/"
+        if (lowerSource.startsWith(iconProviderPrefix)
+                && source.indexOf("?", iconProviderPrefix.length) < 0) {
+            const iconName = source.slice(iconProviderPrefix.length).trim()
+            return iconName.length > 0 ? Quickshell.iconPath(iconName, true) : ""
+        }
+
         const hasScheme = source.indexOf(":") >= 0
         const looksLikePath = source.startsWith("/")
             || source.startsWith("./")

@@ -87,7 +87,7 @@ PopupWindow {
     implicitWidth: root.stableToastWidth > 0
         ? root.stableToastWidth
         : root.naturalToastWidth
-    implicitHeight: toastColumn.implicitHeight + 12
+    implicitHeight: toastColumn.implicitHeight
     color: "transparent"
     grabFocus: false
     visible: root.toastCount > 0 && !root.drawerOpen
@@ -96,10 +96,10 @@ PopupWindow {
         window: root.panelWindow
         item: root.anchorItem
         rect.x: root.theme.drawerPadding
-        rect.y: 0
+        rect.y: root.theme.hyprlandWindowTop - root.anchorItem.height + 1
         rect.width: root.anchorItem.width
         rect.height: root.anchorItem.height
-        edges: Edges.Top | Edges.Right
+        edges: Edges.Bottom | Edges.Right
         gravity: Edges.Bottom | Edges.Left
         adjustment: PopupAdjustment.None
     }
@@ -126,7 +126,7 @@ PopupWindow {
         id: toastColumn
 
         x: root.theme.drawerPadding
-        y: 6
+        y: 0
         width: parent.width - root.theme.drawerPadding * 2
         spacing: 6
 

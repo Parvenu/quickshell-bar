@@ -14,11 +14,15 @@ QtObject {
 
     readonly property int barHeight: 30
     readonly property int barExclusiveZone: scheme.barExclusiveZone
+    readonly property int hyprlandOuterGap: 8
+    readonly property int hyprlandBorderSize: 2
+    readonly property int hyprlandWindowTop: barExclusiveZone + hyprlandOuterGap
+    readonly property int hyprlandClientTop: hyprlandWindowTop + hyprlandBorderSize
     readonly property int controlHeight: 24
     readonly property int smallRadius: 4
     readonly property int drawerRadius: 8
     readonly property int drawerPadding: 10
-    readonly property int drawerScreenMargin: 8
+    readonly property int drawerScreenMargin: hyprlandOuterGap
     readonly property int drawerBodyHeight: 343
     readonly property int workspaceIndicatorWidth: 10
     readonly property int workspaceIndicatorHeight: 1
