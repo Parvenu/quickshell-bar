@@ -17,17 +17,12 @@ PopupWindow {
     required property var sessionControls
     required property var trayItems
 
-    property bool powerMenuOpen: false
     property bool notificationPageOpen: false
 
     signal dashboardRequested()
     signal notificationsRequested()
     signal dismissed()
 
-    onNotificationPageOpenChanged: {
-        if (notificationPageOpen)
-            powerMenuOpen = false
-    }
 
     function trayItemId(item): string {
         return String(item?.id ?? "").toLowerCase()
@@ -46,10 +41,9 @@ PopupWindow {
         return isBluetoothItem(item) || isNetworkItem(item)
     }
 
-    function executePowerAction(command): void {
-        root.powerMenuOpen = false
+    function openPowerMenu(): void {
+        Quickshell.execDetached(["/home/uta/.config/hypr/scripts/PowerMenu.sh"])
         root.visible = false
-        Quickshell.execDetached(command)
     }
 
     implicitWidth: root.anchorItem.width + root.theme.drawerPadding * 2
@@ -71,10 +65,8 @@ PopupWindow {
 
     Component.onCompleted: visible = true
     onVisibleChanged: {
-        if (!visible) {
-            powerMenuOpen = false
+        if (!visible)
             dismissed()
-        }
     }
 
     Shortcut {
@@ -224,16 +216,8 @@ PopupWindow {
                         return "Idle inhibitor"
                     if (dndHover.hovered)
                         return "Do not disturb"
-                    if (hibernateHover.hovered)
-                        return "Hibernate"
-                    if (lockHover.hovered)
-                        return "Lock"
-                    if (suspendHover.hovered)
-                        return "Suspend"
-                    if (rebootHover.hovered)
-                        return "Reboot"
-                    if (powerMouse.containsMouse)
-                        return root.powerMenuOpen ? "Shut down" : "Power options"
+                    if (powerHover.hovered)
+                        return "Power menu"
                     return ""
                 }
 
@@ -370,98 +354,16 @@ PopupWindow {
                     spacing: 2
 
                     DrawerActionButton {
-                        id: hibernateButton
-
-                        visible: root.powerMenuOpen
-                        theme: root.theme
-                        glyph: ""
-                        onClicked: root.executePowerAction(["systemctl", "hibernate"])
-
-                        HoverHandler {
-                            id: hibernateHover
-                        }
-                    }
-
-                    DrawerActionButton {
-                        id: lockButton
-
-                        visible: root.powerMenuOpen
-                        theme: root.theme
-                        glyph: ""
-                        onClicked: root.executePowerAction(["hyprlock", "--quiet"])
-
-                        HoverHandler {
-                            id: lockHover
-                        }
-                    }
-
-                    DrawerActionButton {
-                        id: suspendButton
-
-                        visible: root.powerMenuOpen
-                        theme: root.theme
-                        glyph: ""
-                        onClicked: root.executePowerAction(["systemctl", "suspend"])
-
-                        HoverHandler {
-                            id: suspendHover
-                        }
-                    }
-
-                    DrawerActionButton {
-                        id: rebootButton
-
-                        visible: root.powerMenuOpen
-                        theme: root.theme
-                        glyph: ""
-                        onClicked: root.executePowerAction(["systemctl", "reboot"])
-
-                        HoverHandler {
-                            id: rebootHover
-                        }
-                    }
-
-                    Rectangle {
                         id: powerButton
 
-                        width: 24
-                        height: root.theme.controlHeight
-                        radius: root.theme.smallRadius
-                        color: powerMouse.containsMouse
-                            ? root.theme.criticalSurface
-                            : root.powerMenuOpen
-                                ? root.theme.controlHover
-                                : "transparent"
+                        theme: root.theme
+                        glyph: ""
+                        inactiveGlyphColor: root.theme.powerAccent
+                        opticalHorizontalOffset: 0.5
+                        onClicked: root.openPowerMenu()
 
-                        Behavior on color {
-                            ColorAnimation { duration: root.theme.animationFast }
-                        }
-
-                        CenteredGlyph {
-                            anchors.fill: parent
-                            glyph: ""
-                            color: powerMouse.containsMouse
-                                ? root.theme.criticalSurfaceText
-                                : root.theme.powerAccent
-                            fontFamily: root.theme.fontFamily
-                            fontPixelSize: root.theme.iconSize
-                            opticalHorizontalOffset: 0.5
-                        }
-
-                        MouseArea {
-                            id: powerMouse
-
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-
-                            onClicked: {
-                                if (root.powerMenuOpen)
-                                    root.executePowerAction(["systemctl", "poweroff"])
-                                else
-                                    root.powerMenuOpen = true
-                            }
+                        HoverHandler {
+                            id: powerHover
                         }
                     }
                 }
@@ -680,55 +582,6 @@ PopupWindow {
             }
         }
 
-        Item {
-            id: powerMenuDismissLayer
 
-            readonly property point controlsOrigin: controlsSurface.mapToItem(
-                powerMenuDismissLayer,
-                0,
-                0
-            )
-            readonly property point actionsOrigin: powerActions.mapToItem(
-                powerMenuDismissLayer,
-                0,
-                0
-            )
-            readonly property real controlsTop: controlsOrigin.y
-            readonly property real controlsBottom: controlsTop + controlsSurface.height
-            readonly property real actionsLeft: actionsOrigin.x
-            readonly property real actionsRight: actionsLeft + powerActions.width
-
-            anchors.fill: parent
-            z: 10
-            visible: root.powerMenuOpen
-
-            MouseArea {
-                width: parent.width
-                height: powerMenuDismissLayer.controlsTop
-                onClicked: root.powerMenuOpen = false
-            }
-
-            MouseArea {
-                y: powerMenuDismissLayer.controlsTop
-                width: powerMenuDismissLayer.actionsLeft
-                height: controlsSurface.height
-                onClicked: root.powerMenuOpen = false
-            }
-
-            MouseArea {
-                x: powerMenuDismissLayer.actionsRight
-                y: powerMenuDismissLayer.controlsTop
-                width: parent.width - x
-                height: controlsSurface.height
-                onClicked: root.powerMenuOpen = false
-            }
-
-            MouseArea {
-                y: powerMenuDismissLayer.controlsBottom
-                width: parent.width
-                height: parent.height - y
-                onClicked: root.powerMenuOpen = false
-            }
-        }
     }
 }

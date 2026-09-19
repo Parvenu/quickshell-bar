@@ -14,7 +14,7 @@ A compact, multi-monitor Hyprland status bar built with [Quickshell](https://qui
 - Per-monitor control drawer with:
   - User, host, Hyprland version, and uptime information
   - Unified audio, Bluetooth, network, Hyprsunset, idle-inhibition, and DND controls with hover labels
-  - Inline lock, suspend, hibernate, reboot, and shutdown actions
+  - Rofi power menu with capability checks and all-monitor blur
   - Separate application tray and menus
   - Local month calendar and Proton Calendar web launcher
   - Native notification history in a fixed-height page that preserves the drawer frame
@@ -39,10 +39,11 @@ The current configuration is tested with:
 - `pavucontrol`
 - `kitty`
 - `btop`
+- `rofi`
 - `xdg-open`
 - JetBrainsMono Nerd Font
 
-The drawer invokes `hyprlock --quiet` directly for locking and uses `systemctl` for suspend, hibernate, reboot, and shutdown. Suspend and hibernate availability depends on host support; the current `hypridle` configuration locks the session before sleep.
+The drawer power button launches `~/.config/hypr/scripts/PowerMenu.sh`. The menu queries logind so unsupported actions are hidden and asks the bar to map click-through blur backdrops on the non-menu outputs. Selecting an action executes it immediately; locking invokes `hyprlock --quiet` directly.
 
 The temperature service currently discovers the AMD `k10temp/Tccd1` sensor. Systems without that sensor will show `--°C` until `MetricsService.qml` is adapted to their hardware.
 
