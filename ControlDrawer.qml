@@ -54,7 +54,7 @@ PopupWindow {
     anchor {
         window: root.panelWindow
         item: root.anchorItem
-        rect.x: root.theme.drawerPadding
+        rect.x: root.theme.drawerPadding - root.theme.drawerScreenMargin
         rect.y: 0
         rect.width: root.anchorItem.width
         rect.height: root.anchorItem.height
@@ -105,6 +105,7 @@ PopupWindow {
                     anchors {
                         left: parent.left
                         leftMargin: root.theme.drawerPadding
+                            + root.theme.drawerScreenMargin
                             + Math.floor(root.anchorItem.width)
                             - root.anchorItem.width
                         verticalCenter: parent.verticalCenter
@@ -136,7 +137,10 @@ PopupWindow {
 
                     anchors {
                         right: parent.right
-                        rightMargin: root.theme.drawerPadding
+                        rightMargin: Math.max(
+                            0,
+                            root.theme.drawerPadding - root.theme.drawerScreenMargin
+                        )
                         verticalCenter: parent.verticalCenter
                     }
                     theme: root.theme

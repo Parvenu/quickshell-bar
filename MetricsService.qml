@@ -6,6 +6,11 @@ import Quickshell.Io
 QtObject {
     id: root
 
+    property bool batteryAvailable: false
+    property int batteryCapacity: 0
+    property string batteryStatus: "Unknown"
+    property string batteryPath: ""
+
     property real cpuUsage: 0
     property real memoryUsage: 0
     property real memoryUsedGiB: 0
@@ -15,6 +20,17 @@ QtObject {
 
     property double previousCpuTotal: 0
     property double previousCpuIdle: 0
+
+    function parseBatteryCapacity(text): void {
+        const capacity = Number(text.trim())
+        if (Number.isFinite(capacity))
+            batteryCapacity = Math.max(0, Math.min(100, Math.round(capacity)))
+    }
+
+    function parseBatteryStatus(text): void {
+        const status = text.trim()
+        batteryStatus = status.length > 0 ? status : "Unknown"
+    }
 
     function parseCpu(text): void {
         const line = text.split("\n")[0].trim()
@@ -66,6 +82,43 @@ QtObject {
             cpuTemperature = millidegrees / 1000
     }
 
+    property FileView batteryCapacityFile: FileView {
+        path: root.batteryPath.length > 0 ? `${root.batteryPath}/capacity` : ""
+        preload: root.batteryPath.length > 0
+        watchChanges: false
+        printErrors: false
+        onLoaded: root.parseBatteryCapacity(root.batteryCapacityFile.text())
+    }
+
+    property FileView batteryStatusFile: FileView {
+        path: root.batteryPath.length > 0 ? `${root.batteryPath}/status` : ""
+        preload: root.batteryPath.length > 0
+        watchChanges: false
+        printErrors: false
+        onLoaded: root.parseBatteryStatus(root.batteryStatusFile.text())
+    }
+
+    property Process batteryDetector: Process {
+        command: [
+            "sh",
+            "-c",
+            "for supply in /sys/class/power_supply/*; do [ -f \"$supply/type\" ] || continue; [ \"$(cat \"$supply/type\")\" = Battery ] && { printf '%s\\n' \"$supply\"; break; }; done"
+        ]
+        running: true
+
+        stdout: StdioCollector {
+            id: batteryPathOutput
+
+            onStreamFinished: {
+                const detectedPath = batteryPathOutput.text.trim().split("\n")[0]
+                if (detectedPath.length > 0) {
+                    root.batteryPath = detectedPath
+                    root.batteryAvailable = true
+                }
+            }
+        }
+    }
+
     property FileView cpuFile: FileView {
         path: "/proc/stat"
         preload: true
@@ -113,6 +166,10 @@ QtObject {
         running: true
 
         onTriggered: {
+            if (root.batteryAvailable) {
+                root.batteryCapacityFile.reload()
+                root.batteryStatusFile.reload()
+            }
             root.cpuFile.reload()
             root.memoryFile.reload()
             if (root.temperaturePath.length > 0)
