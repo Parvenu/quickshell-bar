@@ -152,8 +152,8 @@ QtObject {
         const id = _idKey(notification)
         const key = notificationKey(notification)
         const carriedRecord = _record(key)
+        const superseded = _supersededSynchronousNotifications(notification)
 
-        _coalesceSynchronous(notification)
         _registerIdentity(id, key)
 
         const now = Date.now()
@@ -186,6 +186,8 @@ QtObject {
 
         if (!notification.lastGeneration && _shouldShowToast(notification))
             toastRequested(notification)
+
+        _expireNotifications(superseded)
     }
 
     function _queueUpdate(notification): void {
@@ -215,14 +217,13 @@ QtObject {
         const id = _idKey(notification)
         const oldKey = _keyById[id] ?? notificationKey(notification)
         const newKey = notificationKey(notification)
+        const superseded = _supersededSynchronousNotifications(notification)
         let record = _record(oldKey) ?? {
             receivedAt: Date.now(),
             read: notification.transient,
             transient: notification.transient,
             deadline: 0
         }
-
-        _coalesceSynchronous(notification)
 
         if (oldKey !== newKey) {
             _deleteRecordIfOwned(oldKey, id)
@@ -249,6 +250,8 @@ QtObject {
 
         if (_shouldShowToast(notification))
             toastRequested(notification)
+
+        _expireNotifications(superseded)
     }
 
     function _forgetNotification(notification): void {
@@ -377,18 +380,27 @@ QtObject {
         return appIcon.length > 0 ? appIcon : "unknown"
     }
 
-    function _coalesceSynchronous(notification): void {
+    function _supersededSynchronousNotifications(notification): var {
         const synchronousId = _synchronousId(notification)
         if (synchronousId.length === 0)
-            return
+            return []
 
         const scope = _synchronousScope(notification)
         const active = server.trackedNotifications.values.slice()
+        const superseded = []
         for (const candidate of active) {
             if (candidate && candidate !== notification
                     && _synchronousId(candidate) === synchronousId
                     && _synchronousScope(candidate) === scope)
-                candidate.expire()
+                superseded.push(candidate)
+        }
+        return superseded
+    }
+
+    function _expireNotifications(notifications): void {
+        for (const notification of notifications) {
+            if (_isActive(notification))
+                notification.expire()
         }
     }
 

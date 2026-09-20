@@ -43,25 +43,42 @@ PopupWindow {
         if (!notification)
             return
 
-        const hadToasts = toastModel.count > 0
         const key = root.notifications.notificationKey(notification)
-        for (let index = toastModel.count - 1; index >= 0; --index) {
-            const current = toastModel.get(index).notification
-            if (!current || current === notification
-                    || root.notifications.notificationKey(current) === key)
-                toastModel.remove(index)
+        let existingIndex = -1
+        for (let index = 0; index < toastModel.count; ++index) {
+            const current = toastModel.get(index)
+            if (current.notification === notification || current.key === key) {
+                existingIndex = index
+                break
+            }
         }
 
         if (!root.monitor?.focused || root.drawerOpen) {
+            if (existingIndex >= 0)
+                toastModel.remove(existingIndex)
             if (toastModel.count === 0)
                 root.stableToastWidth = 0
             return
         }
 
-        if (!hadToasts || root.stableToastWidth <= 0)
+        if (toastModel.count === 0 || root.stableToastWidth <= 0)
             root.stableToastWidth = root.naturalToastWidth
 
-        toastModel.insert(0, { "notification": notification })
+        if (existingIndex >= 0) {
+            const revision = Number(toastModel.get(existingIndex).revision ?? 0) + 1
+            toastModel.setProperty(existingIndex, "key", key)
+            toastModel.setProperty(existingIndex, "notification", notification)
+            toastModel.setProperty(existingIndex, "revision", revision)
+            if (existingIndex > 0)
+                toastModel.move(existingIndex, 0, 1)
+            return
+        }
+
+        toastModel.insert(0, {
+            "key": key,
+            "notification": notification,
+            "revision": 0
+        })
         while (toastModel.count > root.maximumVisibleToasts)
             toastModel.remove(toastModel.count - 1)
     }
@@ -136,7 +153,9 @@ PopupWindow {
             delegate: Item {
                 id: toastDelegate
 
+                required property string key
                 required property var notification
+                required property int revision
 
                 width: toastColumn.width
                 height: toastCard.implicitHeight
@@ -152,10 +171,21 @@ PopupWindow {
                 }
 
                 Timer {
+                    id: toastTimer
+
                     interval: root.toastTimeoutMs(toastDelegate.notification)
                     running: interval > 0 && root.visible && !toastCard.hovered
                     repeat: false
                     onTriggered: root.removeToast(toastDelegate.notification)
+                }
+
+                Connections {
+                    target: toastDelegate
+
+                    function onRevisionChanged(): void {
+                        if (toastTimer.running)
+                            toastTimer.restart()
+                    }
                 }
 
                 Connections {

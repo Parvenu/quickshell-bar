@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.impl as ControlsImpl
 import Quickshell
 import Quickshell.Services.Notifications
-import Quickshell.Widgets
 
 Rectangle {
     id: root
@@ -35,6 +35,8 @@ Rectangle {
             : root.theme.notificationAccent
     readonly property real progressValue: root.notificationProgress()
     readonly property bool hasProgress: root.progressValue >= 0
+    readonly property bool systemOsd: root.hasProgress
+    readonly property color systemIconColor: "#cecece"
     readonly property var defaultAction: root.findDefaultAction()
     readonly property var alternateActions: root.findAlternateActions()
     readonly property bool hasInlineReply: !root.compact
@@ -292,7 +294,7 @@ Rectangle {
                 border.color: root.theme.divider
                 clip: true
 
-                IconImage {
+                ControlsImpl.IconImage {
                     id: notificationIcon
 
                     anchors {
@@ -300,6 +302,10 @@ Rectangle {
                         margins: 4
                     }
                     source: root.resolvedIconSource
+                    sourceSize.width: width
+                    sourceSize.height: height
+                    fillMode: Image.PreserveAspectFit
+                    color: root.systemOsd ? root.systemIconColor : "transparent"
                     asynchronous: true
                     mipmap: true
                     visible: root.resolvedIconSource.length > 0
@@ -323,7 +329,9 @@ Rectangle {
                 CenteredGlyph {
                     anchors.fill: parent
                     glyph: ""
-                    color: root.accentColor
+                    color: root.systemOsd
+                        ? root.systemIconColor
+                        : root.accentColor
                     fontFamily: root.theme.fontFamily
                     fontPixelSize: root.theme.iconSize + 1
                     visible: root.resolvedIconSource.length === 0
