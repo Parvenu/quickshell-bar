@@ -23,6 +23,12 @@ Row {
         readonly property int capacity: root.metrics.batteryCapacity
         readonly property bool charging: root.metrics.batteryStatus === "Charging"
 
+        HoverHandler {
+            id: batteryHover
+            enabled: root.showBatteryHoverInfo
+                && root.metrics.batteryDetailsAvailable
+        }
+
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showBatteryHoverInfo
@@ -85,12 +91,6 @@ Row {
             }
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.iconSize
-
-            HoverHandler {
-                id: batteryHover
-                enabled: root.showBatteryHoverInfo
-                    && root.metrics.batteryDetailsAvailable
-            }
         }
 
         Text {
