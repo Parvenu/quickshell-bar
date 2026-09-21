@@ -145,7 +145,7 @@ Row {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "󰾆"
+            text: ""
             color: root.theme.memoryAccent
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.iconSize
