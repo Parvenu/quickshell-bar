@@ -8,11 +8,14 @@ Row {
 
     required property var metrics
     required property var theme
+    property bool showBatteryHoverInfo: true
 
     height: root.theme.controlHeight
     spacing: 12
 
     Row {
+        id: batteryDisplay
+
         height: root.height
         spacing: 4
         visible: root.metrics.batteryAvailable
@@ -21,6 +24,30 @@ Row {
         readonly property bool charging: root.metrics.batteryStatus === "Charging"
 
         Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.showBatteryHoverInfo
+                && batteryHover.hovered
+                && root.metrics.batteryDetailsAvailable
+            text: root.metrics.batteryDetailText
+            color: root.theme.textSecondary
+            font.family: root.theme.fontFamily
+            font.pixelSize: root.theme.fontSize
+            font.weight: Font.DemiBold
+        }
+
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.showBatteryHoverInfo
+                && batteryHover.hovered
+                && root.metrics.batteryDetailsAvailable
+            width: 1
+            height: 16
+            color: root.theme.divider
+        }
+
+        Text {
+            id: batteryIcon
+
             anchors.verticalCenter: parent.verticalCenter
             text: {
                 if (parent.charging)
@@ -58,6 +85,12 @@ Row {
             }
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.iconSize
+
+            HoverHandler {
+                id: batteryHover
+                enabled: root.showBatteryHoverInfo
+                    && root.metrics.batteryDetailsAvailable
+            }
         }
 
         Text {

@@ -119,6 +119,7 @@ PopupWindow {
                     metrics: root.metrics
                     showAudioControls: false
                     showDrawerButton: false
+                    showBatteryHoverInfo: false
                 }
 
                 Item {

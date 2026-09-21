@@ -13,6 +13,7 @@ Item {
     property bool drawerOpen: false
     property bool showAudioControls: true
     property bool showDrawerButton: true
+    property bool showBatteryHoverInfo: true
 
     signal drawerClicked()
 
@@ -34,6 +35,7 @@ Item {
         }
         metrics: root.metrics
         theme: root.theme
+        showBatteryHoverInfo: root.showBatteryHoverInfo
     }
 
     Rectangle {

@@ -7,6 +7,7 @@ A compact, multi-monitor Hyprland status bar built with [Quickshell](https://qui
 ## Features
 
 - Active and occupied Hyprland workspaces
+- Battery level plus hover details for charge/discharge rate and remaining time
 - CPU usage, AMD CPU temperature, and memory usage
 - Right-click on the metrics group to open `btop` in `kitty`
 - PipeWire speaker and microphone mute controls
@@ -35,6 +36,7 @@ The current configuration is tested with:
 - Quickshell 0.3.1
 - Hyprland 0.56.2
 - PipeWire
+- UPower
 - NetworkManager Applet (`nm-applet`)
 - Blueman
 - Adwaita icon theme
