@@ -122,14 +122,25 @@ Row {
         }
 
         Text {
+            id: cpuUsageLabel
+
             readonly property int usage: Math.round(root.metrics.cpuUsage)
 
             anchors.verticalCenter: parent.verticalCenter
+            width: Math.ceil(cpuUsageMetrics.advanceWidth)
             text: `${usage}%`
+            horizontalAlignment: Text.AlignRight
             color: usage >= 90 ? root.theme.criticalText : root.theme.textPrimary
             font.family: root.theme.fontFamily
             font.pixelSize: root.theme.fontSize
             font.weight: Font.DemiBold
+
+            TextMetrics {
+                id: cpuUsageMetrics
+
+                font: cpuUsageLabel.font
+                text: "100%"
+            }
         }
     }
 
