@@ -13,15 +13,11 @@ QtObject {
     property bool batteryDetailsAvailable: false
     property string batteryDetailText: ""
 
-    property real cpuUsage: 0
     property real memoryUsage: 0
     property real memoryUsedGiB: 0
     property real memoryTotalGiB: 0
     property real cpuTemperature: 0
     property string temperaturePath: ""
-
-    property double previousCpuTotal: 0
-    property double previousCpuIdle: 0
 
     function parseBatteryCapacity(text): void {
         const capacity = Number(text.trim())
@@ -113,27 +109,6 @@ QtObject {
             upowerBattery.running = true
     }
 
-    function parseCpu(text): void {
-        const line = text.split("\n")[0].trim()
-        const fields = line.split(/\s+/)
-        if (fields[0] !== "cpu" || fields.length < 9)
-            return
-
-        const values = fields.slice(1, 9).map(value => Number(value))
-        const idle = values[3] + values[4]
-        const total = values.reduce((sum, value) => sum + value, 0)
-
-        if (previousCpuTotal > 0) {
-            const totalDelta = total - previousCpuTotal
-            const idleDelta = idle - previousCpuIdle
-            if (totalDelta > 0)
-                cpuUsage = Math.max(0, Math.min(100, 100 * (totalDelta - idleDelta) / totalDelta))
-        }
-
-        previousCpuTotal = total
-        previousCpuIdle = idle
-    }
-
     function parseMemory(text): void {
         let totalKiB = 0
         let availableKiB = 0
@@ -222,13 +197,6 @@ QtObject {
         onTriggered: root.refreshBatteryDetails()
     }
 
-    property FileView cpuFile: FileView {
-        path: "/proc/stat"
-        preload: true
-        watchChanges: false
-        onLoaded: root.parseCpu(root.cpuFile.text())
-    }
-
     property FileView memoryFile: FileView {
         path: "/proc/meminfo"
         preload: true
@@ -273,7 +241,6 @@ QtObject {
                 root.batteryCapacityFile.reload()
                 root.batteryStatusFile.reload()
             }
-            root.cpuFile.reload()
             root.memoryFile.reload()
             if (root.temperaturePath.length > 0)
                 root.temperatureFile.reload()

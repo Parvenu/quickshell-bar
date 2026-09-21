@@ -8,7 +8,7 @@ A compact, multi-monitor Hyprland status bar built with [Quickshell](https://qui
 
 - Active and occupied Hyprland workspaces
 - Battery level plus hover details for charge/discharge rate and remaining time
-- CPU usage, AMD CPU temperature, and memory usage
+- AMD CPU temperature and memory usage
 - Right-click on the metrics group to open `btop` in `kitty`
 - PipeWire speaker and microphone mute controls
 - Right-click audio controls to open the matching `pavucontrol` tab
